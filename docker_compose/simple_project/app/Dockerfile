@@ -20,8 +20,15 @@ RUN  mkdir -p /var/www/static/ \
      && pip install --upgrade pip \
      && pip install -r requirements.txt
 
+RUN python manage.py collectstatic --no-input
+
 COPY . .
 
 EXPOSE 8000
 
 ENTRYPOINT ["uwsgi", "--strict", "--ini", "uwsgi.ini"]
+
+CMD ["sh", "-c", "python manage.py migrate &&
+        python manage.py collectstatic --no-input &&
+        python create_superuser.py &&
+        python manage.py runserver 0.0.0.0:8000"]
