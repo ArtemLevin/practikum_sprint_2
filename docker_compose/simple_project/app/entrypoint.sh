@@ -1,15 +1,16 @@
 #!/bin/sh
 
-# Выполнить миграции
-python3 manage.py migrate
+# Включаем режим "выход при ошибке"
+set -e
 
-# Собрать статические файлы
-python3 manage.py collectstatic --noinput
+# Ожидание доступности базы данных
+dockerize -wait tcp://theatre-db:5432 -timeout 30s
 
-# Создать суперпользователя, если указаны переменные окружения
-if [ "$DJANGO_SUPERUSER_USERNAME" ]; then
-    python3 create_superuser.py
-fi
+# Выполнение миграций базы данных
+python manage.py migrate
 
-# Запустить uwsgi
+# Создание суперпользователя (если его ещё нет)
+python create_superuser.py
+
+# Запуск uWSGI с использованием конфигурационного файла uwsgi.ini
 uwsgi --ini uwsgi.ini
