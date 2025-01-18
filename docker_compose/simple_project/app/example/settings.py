@@ -132,3 +132,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Автоматическое создание суперпользователя
+if os.environ.get('DJANGO_SUPERUSER_USERNAME') and os.environ.get('DJANGO_SUPERUSER_PASSWORD'):
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    if not User.objects.filter(username=os.environ.get('DJANGO_SUPERUSER_USERNAME')).exists():
+        User.objects.create_superuser(
+            username=os.environ.get('DJANGO_SUPERUSER_USERNAME'),
+            password=os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+        )

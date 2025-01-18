@@ -7,7 +7,7 @@ services:
     env_file:
       - ./.env
     depends_on:
-      - db
+      - theatre-db
 
   nginx:
     image: nginx:latest
@@ -18,7 +18,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - django
+      - service
 
   theatre-db:
     image: postgres:15
@@ -31,6 +31,11 @@ services:
       - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
+
+volumes:
+  static_volume:
+
+
 
 
 

@@ -7,34 +7,30 @@ ENV PYTHONUNBUFFERED 1
 ENV UWSGI_PROCESSES 1
 ENV UWSGI_THREADS 16
 ENV UWSGI_HARAKIRI 240
-ENV DJANGO_SETTINGS_MODULE 'example.settings'
+ENV DJANGO_SETTINGS_MODULE example.settings
 
+# Копируем необходимые файлы
 COPY run_uwsgi.sh run_uwsgi.sh
 COPY requirements.txt requirements.txt
 COPY uwsgi/uwsgi.ini uwsgi.ini
 
-RUN  mkdir -p /var/www/static/ \
-     && mkdir -p /var/www/media/ \
-     && mkdir -p /opt/app/static/ \
-     && mkdir -p /opt/app/media/ \
-     && pip install --upgrade pip \
-     && pip install -r requirements.txt
+# Создаём директории
+RUN mkdir -p /var/www/static /var/www/media /opt/app/static /opt/app/media
 
-RUN python manage.py collectstatic --no-input
+# Устанавливаем зависимости
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
+# Копируем проект
 COPY . .
 
 EXPOSE 8000
 
-# ENTRYPOINT ["uwsgi", "--strict", "--ini", "uwsgi.ini"]
+# Проверка состояния контейнера
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
+    CMD curl -f http://localhost:8000/ || exit 1
 
-# CMD ["sh", "-c", "python manage.py migrate &&
-#         python manage.py collectstatic --no-input &&
-#         python create_superuser.py &&
-#         python manage.py runserver 0.0.0.0:8000"]
-
-CMD ["bash", "-c", "python manage.py migrate &&
-        python manage.py collectstatic --noinput &&
-        python manage.py createsuperuser --noinput ||
-        true &&
-        uwsgi --ini uwsgi.ini"]
+CMD ["sh", "-c", "python manage.py migrate &&
+                  python manage.py collectstatic --noinput &&
+                  if [ \"$DJANGO_SUPERUSER_USERNAME\" ]; then python manage.py createsuperuser --noinput; fi &&
+                  uwsgi --ini uwsgi.ini"]
