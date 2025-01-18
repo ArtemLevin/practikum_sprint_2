@@ -7,13 +7,11 @@ services:
       - "8000"
     env_file:
       - ./.env
-    command: >
-      sh -c "
-      dockerize -wait tcp://theatre-db:5432 -timeout 30s
-      "
     depends_on:
       - theatre-db
     restart: always
+    volumes:
+      - static_volume:/opt/app/static
 
   nginx:
     image: nginx:latest
@@ -26,6 +24,7 @@ services:
     depends_on:
       - service
     restart: always
+
 
   theatre-db:
     image: postgres:15

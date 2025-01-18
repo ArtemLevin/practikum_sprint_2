@@ -9,6 +9,8 @@ ENV UWSGI_THREADS 16
 ENV UWSGI_HARAKIRI 240
 ENV DJANGO_SETTINGS_MODULE example.settings
 ENV DOCKERIZE_VERSION v0.6.1
+ENV DEBUG=False
+
 
 # Копируем необходимые файлы
 COPY run_uwsgi.sh run_uwsgi.sh
@@ -36,10 +38,6 @@ COPY . .
 COPY entrypoint.sh /opt/app/entrypoint.sh
 
 EXPOSE 8000
-
-# Проверка состояния контейнера
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
-    CMD curl -f http://localhost:8000/ || exit 1
 
 RUN chmod +x entrypoint.sh
 
