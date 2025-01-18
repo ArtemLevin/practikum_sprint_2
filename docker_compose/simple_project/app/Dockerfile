@@ -26,9 +26,15 @@ COPY . .
 
 EXPOSE 8000
 
-ENTRYPOINT ["uwsgi", "--strict", "--ini", "uwsgi.ini"]
+# ENTRYPOINT ["uwsgi", "--strict", "--ini", "uwsgi.ini"]
 
-CMD ["sh", "-c", "python manage.py migrate &&
-        python manage.py collectstatic --no-input &&
-        python create_superuser.py &&
-        python manage.py runserver 0.0.0.0:8000"]
+# CMD ["sh", "-c", "python manage.py migrate &&
+#         python manage.py collectstatic --no-input &&
+#         python create_superuser.py &&
+#         python manage.py runserver 0.0.0.0:8000"]
+
+CMD ["bash", "-c", "python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        python manage.py createsuperuser --noinput ||
+        true &&
+        uwsgi --ini uwsgi.ini"]
