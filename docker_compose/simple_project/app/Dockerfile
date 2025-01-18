@@ -24,13 +24,16 @@ RUN pip install -r requirements.txt
 # Копируем проект
 COPY . .
 
+# Копируем скрипт entrypoint
+COPY entrypoint.sh /opt/app/entrypoint.sh
+
 EXPOSE 8000
 
 # Проверка состояния контейнера
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
     CMD curl -f http://localhost:8000/ || exit 1
 
-CMD ["sh", "-c", "python manage.py migrate &&
-                  python manage.py collectstatic --noinput &&
-                  if [ \"$DJANGO_SUPERUSER_USERNAME\" ]; then python manage.py createsuperuser --noinput; fi &&
-                  uwsgi --ini uwsgi.ini"]
+# Указываем скрипт как точку входа
+ENTRYPOINT ["sh", "/opt/app/entrypoint.sh"]
+
+
