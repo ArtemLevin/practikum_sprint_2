@@ -8,7 +8,7 @@ python3 manage.py collectstatic --noinput
 
 # Создать суперпользователя, если указаны переменные окружения
 if [ "$DJANGO_SUPERUSER_USERNAME" ]; then
-    python3 manage.py createsuperuser --noinput
+    python3 create_superuser.py
 fi
 
 # Запустить uwsgi

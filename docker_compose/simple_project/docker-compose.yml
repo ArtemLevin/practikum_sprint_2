@@ -1,4 +1,5 @@
-version: '3'
+version: '3.8'
+
 services:
   service:
     build: app
@@ -8,6 +9,13 @@ services:
       - ./.env
     depends_on:
       - theatre-db
+    entrypoint: >
+      sh -c "
+      dockerize -wait tcp://theatre-db:5432 -timeout 30s &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000
+      "
+    restart: always
 
   nginx:
     image: nginx:latest
@@ -19,6 +27,7 @@ services:
       - "80:80"
     depends_on:
       - service
+    restart: always
 
   theatre-db:
     image: postgres:15
@@ -31,12 +40,7 @@ services:
       - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5433:5432"
+    restart: always
 
 volumes:
   static_volume:
-
-
-
-
-
-
